@@ -1,0 +1,4 @@
+.DS_STORE
+lib/
+octave_workspace
+*.pdf
