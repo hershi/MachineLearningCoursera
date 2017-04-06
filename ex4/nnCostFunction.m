@@ -63,13 +63,14 @@ Theta2_grad = zeros(size(Theta2));
 %
 
 X = [ones(m, 1) X];
-l1 = sigmoid(X * Theta1');
-l1 = [ones(size(l1,1), 1), l1];
-l2 = sigmoid(l1  * Theta2');
-%[_, p] = max(l2, [], 2);
+z2 = X * Theta1';
+a2 = sigmoid(z2);
+a2 = [ones(size(a2,1), 1), a2];
+z3 = a2  * Theta2';
+a3 = sigmoid(z3);
 
 for i = 1:m
-  h = l2(i,:)';
+  h = a3(i,:)';
   yi = zeros(size(h,1), 1);
   yi(y(i)) = 1;
   J = J + sum((-yi.*log(h)) - ((1-yi).*log(1-h)));
@@ -83,11 +84,29 @@ tempTheta2(:,1) = zeros(size(Theta2,1), 1);
 J = J + ((sum(sum(tempTheta1)) + sum(sum(tempTheta2))) * lambda / (2*m));
 
 % -------------------------------------------------------------
+for k = 1:m
+  hk = a3(k,:)';
+  yk = zeros(size(a3,2), 1);
+  yk(y(k)) = 1;
+  d3 = a3(k,:)' - yk;
+
+  d2 = (Theta2' * d3);
+  d2 = d2(2:end) .* sigmoidGradient(z2(k,:)');
+  Theta2_grad = Theta2_grad + d3 * a2(k,:);
+  Theta1_grad = Theta1_grad + d2 * X(k, :);
+endfor
 
 % =========================================================================
 
+lm = lambda / m;
+normalizer1 = lm .* Theta1;
+normalizer1(:,1) = zeros(size(normalizer1, 1), 1);
+normalizer2 = lm .* Theta2;
+normalizer2(:,1) = zeros(size(normalizer2,1), 1);
+Theta1_grad = (Theta1_grad ./ m) + normalizer1;
+Theta2_grad = (Theta2_grad ./ m) + normalizer2;
+
 % Unroll gradients
 grad = [Theta1_grad(:) ; Theta2_grad(:)];
-
 
 end
