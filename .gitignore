@@ -2,3 +2,4 @@
 lib/
 octave_workspace
 *.pdf
+*.mat
